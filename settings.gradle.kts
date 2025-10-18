@@ -23,3 +23,4 @@ rootProject.name = "InterLocApp"
 include(":internetapp")
 include(":locationapp")
 include(":shared-logger")
+include(":shared-models")
