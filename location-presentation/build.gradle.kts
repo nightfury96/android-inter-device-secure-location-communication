@@ -38,7 +38,6 @@ android {
 
 dependencies {
     implementation(project(":location-domain"))
-    implementation(project(":location-data"))
     implementation(project(":shared-logger"))
     implementation(project(":shared-models"))
 
@@ -54,4 +53,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

@@ -8,6 +8,7 @@ dependencies {
 
     // Coroutines for async Flow-based APIs in repository contracts
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.javax.inject)
 
     // Optional unit test dependencies
     testImplementation(kotlin("test"))
