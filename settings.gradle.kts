@@ -23,3 +23,7 @@ rootProject.name = "InterLocApp"
 include(":internetapp")
 include(":locationapp")
 include(":shared-logger")
+include(":shared-models")
+include(":location-domain")
+include(":location-data")
+include(":location-presentation")

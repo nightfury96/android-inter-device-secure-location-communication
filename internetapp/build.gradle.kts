@@ -39,6 +39,7 @@ android {
 
 dependencies {
     implementation(project(":shared-logger"))
+    implementation(project(":shared-models"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
