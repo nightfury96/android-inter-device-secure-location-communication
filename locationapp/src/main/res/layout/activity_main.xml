@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="16dp"
     tools:context=".MainActivity">
 
     <TextView
@@ -12,9 +13,39 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello Location app!"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/startBT"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/receivedLocationTV" />
+
+    <Button
+        android:id="@+id/stopBT"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop"
+        app:layout_constraintStart_toEndOf="@+id/startBT"
+        app:layout_constraintTop_toTopOf="@id/startBT" />
+
+    <Button
+        android:id="@+id/clearBT"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Clear"
+        app:layout_constraintStart_toEndOf="@id/stopBT"
+        app:layout_constraintTop_toTopOf="@id/startBT" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/locationListRV"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/startBT" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

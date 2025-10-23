@@ -57,6 +57,13 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
+    implementation(libs.androidx.lifecycle.service)
+    implementation(libs.play.services.location)
+
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.work.compiler)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 

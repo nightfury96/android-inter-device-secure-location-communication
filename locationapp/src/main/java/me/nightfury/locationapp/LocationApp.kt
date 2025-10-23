@@ -8,6 +8,6 @@ import me.nightfury.sharedlogger.AppLogger
 class LocationApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        AppLogger.d("LocationApp", "App started")
+        AppLogger.i("LocationApp", "App started")
     }
 }

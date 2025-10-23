@@ -5,10 +5,19 @@ import me.nightfury.locationdomain.repo.LocationRepository
 import me.nightfury.sharedmodels.LocationRecord
 import javax.inject.Inject
 
-class GetAllLocationsUseCase @Inject constructor(
+class LocationDataUseCase @Inject constructor(
     private val repo: LocationRepository
 ) {
-    fun invoke(): Flow<List<LocationRecord>> {
+    fun getAll(): Flow<List<LocationRecord>> {
         return repo.getLocationsFlow()
     }
+
+    suspend fun clear() {
+        return repo.clearLocations()
+    }
+
+    suspend fun isServiceRunning(): Boolean {
+        return repo.isServiceRunning()
+    }
+
 }

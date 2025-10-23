@@ -3,26 +3,93 @@ package me.nightfury.locationpresentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import me.nightfury.locationdomain.repo.LocationRepository
+import me.nightfury.locationdomain.usecases.LocationDataUseCase
+import me.nightfury.locationdomain.usecases.ManageLocationWorkerUseCase
+import me.nightfury.sharedlogger.AppLogger
 import me.nightfury.sharedmodels.LocationRecord
 import javax.inject.Inject
 
+data class LocationUiState(
+    val locations: List<LocationRecord> = emptyList(),
+    val isServiceRunning: Boolean = false,
+    val statusMessage: String = "Service Idle"
+)
+
 @HiltViewModel
 class LocationViewModel @Inject constructor(
-    private val repository: LocationRepository
+    private val locationDataUseCase: LocationDataUseCase,
+    private val manageLocationWorkerUseCase: ManageLocationWorkerUseCase
 ) : ViewModel() {
+    private val _uiState = MutableStateFlow(LocationUiState())
+    val uiState: StateFlow<LocationUiState> = _uiState
+    private val logSource = "LocationViewModel"
 
-    val locations: StateFlow<List<LocationRecord>> = repository.getLocationsFlow()
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    init {
+        locationDataUseCase.getAll()
+            .onStart { emit(emptyList()) }
+            .onEach { locations ->
+                viewModelScope.launch {
+                    // Fetch the current service status
+                    val isRunning = manageLocationWorkerUseCase.isServiceRunning()
 
-    fun addTestLocation() {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.saveLocation(LocationRecord(0, 220.2, 1000.0))
+                    // Update the StateFlow with all collected data points
+                    _uiState.value = LocationUiState(
+                        locations = locations,
+                        isServiceRunning = isRunning,
+                        statusMessage = if (isRunning) "Service ACTIVE (1 min sampling)" else "Service STOPPED"
+                    )
+                    AppLogger.d(
+                        logSource,
+                        "UI State updated. Locations: ${locations.size}, Running: $isRunning"
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun startLocationService() {
+        viewModelScope.launch {
+            try {
+                manageLocationWorkerUseCase.startPeriodicWork()
+                updateServiceStatus(true)
+                AppLogger.i(logSource, "Start service command issued.")
+            } catch (e: Exception) {
+                AppLogger.e(logSource, "Failed to start service.", e)
+                _uiState.value = _uiState.value.copy(statusMessage = "ERROR: Start failed.")
+            }
+        }
+    }
+
+    fun stopLocationService() {
+        viewModelScope.launch {
+            try {
+                manageLocationWorkerUseCase.stopPeriodicWork()
+                updateServiceStatus(false)
+                AppLogger.i(logSource, "Stop service command issued.")
+            } catch (e: Exception) {
+                AppLogger.e(logSource, "Failed to stop service.", e)
+                _uiState.value = _uiState.value.copy(statusMessage = "ERROR: Stop failed.")
+            }
+        }
+    }
+
+    private fun updateServiceStatus(isRunning: Boolean) {
+        _uiState.value = _uiState.value.copy(
+            isServiceRunning = isRunning,
+            statusMessage = if (isRunning) "Service ACTIVE (1 min sampling)" else "Service STOPPED"
+        )
+    }
+
+    fun clearLocations() {
+        viewModelScope.launch {
+            locationDataUseCase.clear()
+            AppLogger.i(logSource, "Clear locations command.")
         }
     }
 }
