@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import me.nightfury.locationdomain.usecases.LocationDataUseCase
 import me.nightfury.locationdomain.usecases.ManageLocationWorkerUseCase
-import me.nightfury.sharedlogger.AppLogger
+import me.nightfury.sharedlogger.Logger
 import me.nightfury.sharedmodels.LocationRecord
 import javax.inject.Inject
 
@@ -24,7 +24,8 @@ data class LocationUiState(
 @HiltViewModel
 class LocationViewModel @Inject constructor(
     private val locationDataUseCase: LocationDataUseCase,
-    private val manageLocationWorkerUseCase: ManageLocationWorkerUseCase
+    private val manageLocationWorkerUseCase: ManageLocationWorkerUseCase,
+    private val logger: Logger
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LocationUiState())
     val uiState: StateFlow<LocationUiState> = _uiState
@@ -34,21 +35,19 @@ class LocationViewModel @Inject constructor(
         locationDataUseCase.getAll()
             .onStart { emit(emptyList()) }
             .onEach { locations ->
-                viewModelScope.launch {
-                    // Fetch the current service status
-                    val isRunning = manageLocationWorkerUseCase.isServiceRunning()
+                // Fetch the current service status
+                val isRunning = manageLocationWorkerUseCase.isServiceRunning()
 
-                    // Update the StateFlow with all collected data points
-                    _uiState.value = LocationUiState(
-                        locations = locations,
-                        isServiceRunning = isRunning,
-                        statusMessage = if (isRunning) "Service ACTIVE (1 min sampling)" else "Service STOPPED"
-                    )
-                    AppLogger.d(
-                        logSource,
-                        "UI State updated. Locations: ${locations.size}, Running: $isRunning"
-                    )
-                }
+                // Update the StateFlow with all collected data points
+                _uiState.value = LocationUiState(
+                    locations = locations,
+                    isServiceRunning = isRunning,
+                    statusMessage = if (isRunning) "Service ACTIVE (1 min sampling)" else "Service STOPPED"
+                )
+                logger.d(
+                    logSource,
+                    "UI State updated. Locations: ${locations.size}, Running: $isRunning"
+                )
             }
             .launchIn(viewModelScope)
     }
@@ -58,9 +57,9 @@ class LocationViewModel @Inject constructor(
             try {
                 manageLocationWorkerUseCase.startPeriodicWork()
                 updateServiceStatus(true)
-                AppLogger.i(logSource, "Start service command issued.")
+                logger.i(logSource, "Start service command issued.")
             } catch (e: Exception) {
-                AppLogger.e(logSource, "Failed to start service.", e)
+                logger.e(logSource, "Failed to start service.", e)
                 _uiState.value = _uiState.value.copy(statusMessage = "ERROR: Start failed.")
             }
         }
@@ -71,9 +70,9 @@ class LocationViewModel @Inject constructor(
             try {
                 manageLocationWorkerUseCase.stopPeriodicWork()
                 updateServiceStatus(false)
-                AppLogger.i(logSource, "Stop service command issued.")
+                logger.i(logSource, "Stop service command issued.")
             } catch (e: Exception) {
-                AppLogger.e(logSource, "Failed to stop service.", e)
+                logger.e(logSource, "Failed to stop service.", e)
                 _uiState.value = _uiState.value.copy(statusMessage = "ERROR: Stop failed.")
             }
         }
@@ -89,7 +88,7 @@ class LocationViewModel @Inject constructor(
     fun clearLocations() {
         viewModelScope.launch {
             locationDataUseCase.clear()
-            AppLogger.i(logSource, "Clear locations command.")
+            logger.i(logSource, "Clear locations command.")
         }
     }
 }
