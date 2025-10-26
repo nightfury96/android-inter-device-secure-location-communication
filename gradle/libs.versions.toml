@@ -20,6 +20,7 @@ playServicesLocation = "21.3.0"
 workRuntimeKtx = "2.10.5"
 mockk = "1.14.6"
 hiltWork = "1.3.0"
+turbine = "1.1.0"
 
 
 [libraries]
@@ -38,7 +39,8 @@ androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-s
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutinesKotlinxCore" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesKotlinxCore" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
-mockk = { module = "io.mockk:mockk-agent", version.ref = "mockk" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 # Hilt DI
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
