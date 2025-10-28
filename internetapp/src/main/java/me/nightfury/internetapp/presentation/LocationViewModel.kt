@@ -29,6 +29,7 @@ class LocationViewModel(
                 LocationViewIntent.StartService -> executeCommand { remoteLocationRepository.startService() }
                 LocationViewIntent.StopService -> executeCommand { remoteLocationRepository.stopService() }
                 LocationViewIntent.RetrieveLocationHistory -> retrieveLocationHistory()
+                LocationViewIntent.RetrieveLatestLocation -> retrieveLatestLocation()
                 LocationViewIntent.ClearError -> _state.update { it.copy(error = null) }
             }
         }
@@ -53,6 +54,7 @@ class LocationViewModel(
                 )
             }
         }.onFailure { exception ->
+            exception.printStackTrace()
             _state.update {
                 it.copy(
                     isLoading = false,
@@ -78,6 +80,27 @@ class LocationViewModel(
                 it.copy(
                     isLoading = false,
                     error = exception.message ?: "Failed to retrieve location history"
+                )
+            }
+        }
+    }
+
+    private suspend fun retrieveLatestLocation() {
+        _state.update { it.copy(isLoading = true, error = null) }
+        val result = remoteLocationRepository.getLatestLocation()
+
+        result.onSuccess { latest ->
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    latestLocation = latest
+                )
+            }
+        }.onFailure { exception ->
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    error = exception.message ?: "Failed to retrieve latest location"
                 )
             }
         }
