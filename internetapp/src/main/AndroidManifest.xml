@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="me.nightfury.permission.ACCESS_LOCATION_PROVIDER" />
     <application
         android:name="me.nightfury.InternetApp"
         android:allowBackup="true"

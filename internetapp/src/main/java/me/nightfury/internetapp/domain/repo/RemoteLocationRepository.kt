@@ -18,4 +18,9 @@ interface RemoteLocationRepository {
      * Retrieves the list of all stored location records from the Location App.
      */
     suspend fun getAllLocations(): Result<List<LocationRecord>>
+
+    /**
+     * Retrieves the latest stored location record from the Location App.
+     */
+    suspend fun getLatestLocation(): Result<LocationRecord?>
 }

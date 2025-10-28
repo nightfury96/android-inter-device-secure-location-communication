@@ -8,5 +8,6 @@ sealed class LocationViewIntent {
     data object StartService : LocationViewIntent()
     data object StopService : LocationViewIntent()
     data object RetrieveLocationHistory : LocationViewIntent()
+    data object RetrieveLatestLocation : LocationViewIntent()
     data object ClearError : LocationViewIntent()
 }

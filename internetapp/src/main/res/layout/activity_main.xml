@@ -11,6 +11,7 @@
         android:id="@+id/statusTV"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
         android:text="Service Status: Unknown"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -24,12 +25,14 @@
         android:layout_height="24dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
     <LinearLayout
         android:id="@+id/commandsLL"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -53,33 +56,72 @@
             android:text="Stop Service" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/getHistoryBT"
-        style="@style/Widget.Material3.Button.OutlinedButton"
+    <LinearLayout
+        android:id="@+id/queriesLL"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Get History"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/commandsLL" />
+        app:layout_constraintTop_toBottomOf="@id/commandsLL">
+
+        <Button
+            android:id="@+id/getHistoryBT"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="Get History"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/commandsLL" />
+
+        <Button
+            android:id="@+id/getLatestBT"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Get Latest"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/commandsLL" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/latestLocationTitleTV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Latest Location: None"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/queriesLL" />
 
     <TextView
         android:id="@+id/historyTitleTV"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
         android:text="Location History:"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/getHistoryBT" />
+        app:layout_constraintTop_toBottomOf="@id/latestLocationTitleTV" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/locationHistoryRV"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

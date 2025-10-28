@@ -9,6 +9,7 @@ import me.nightfury.sharedmodels.LocationRecord
 data class LocationViewState(
     val serviceStatus: String = "Service Status: Unknown",
     val locationHistory: List<LocationRecord> = emptyList(),
+    val latestLocation: LocationRecord? = null,
     val isLoading: Boolean = false,
     val lastCommandResponse: String? = null,
     val error: String? = null

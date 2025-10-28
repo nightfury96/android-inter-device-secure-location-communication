@@ -1,5 +1,6 @@
 package me.nightfury.internetapp
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -21,6 +22,9 @@ import me.nightfury.internetapp.presentation.LocationViewState
 import me.nightfury.internetapp.presentation.adapter.LocationHistoryAdapter
 import me.nightfury.sharedlogger.AppLogger
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -59,6 +63,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val dateFormat = SimpleDateFormat("HH:mm:ss dd/MMM", Locale.getDefault())
+
+    @SuppressLint("SetTextI18n")
     private fun updateUI(state: LocationViewState) {
         binding.statusTV.apply {
             text = state.serviceStatus
@@ -79,6 +86,17 @@ class MainActivity : AppCompatActivity() {
 
         locationAdapter.submitList(state.locationHistory)
         binding.historyTitleTV.text = "Location History (${state.locationHistory.size}):"
+
+        state.latestLocation?.let { latestLocation ->
+            binding.latestLocationTitleTV.text = "Latest Location: ${
+                String.format(
+                    Locale.getDefault(),
+                    "Lat: %.4f, Lon: %.4f",
+                    latestLocation.latitude,
+                    latestLocation.longitude
+                )
+            } ,Date: ${dateFormat.format(Date(latestLocation.timestamp))}"
+        }
 
         state.lastCommandResponse?.let { response ->
             Toast.makeText(this, response, Toast.LENGTH_SHORT).show()
@@ -105,6 +123,10 @@ class MainActivity : AppCompatActivity() {
         binding.getHistoryBT.setOnClickListener {
             viewModel.processIntent(LocationViewIntent.RetrieveLocationHistory)
             AppLogger.d("InternetAppUI", "Intent: RetrieveLocationHistory sent.")
+        }
+        binding.getLatestBT.setOnClickListener {
+            viewModel.processIntent(LocationViewIntent.RetrieveLatestLocation)
+            AppLogger.d("InternetAppUI", "Intent: RetrieveLatestLocation sent.")
         }
     }
 
