@@ -52,7 +52,11 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-//    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.datastore)
+    implementation(libs.tink)
+
+    implementation(libs.sqlcipher.android)
+    implementation(libs.androidx.sqlite)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
