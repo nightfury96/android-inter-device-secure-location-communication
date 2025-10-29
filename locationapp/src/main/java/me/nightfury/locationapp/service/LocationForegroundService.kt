@@ -133,14 +133,13 @@ class LocationForegroundService : LifecycleService() {
     }
 
     private fun startLocationUpdates() {
-        startForeground(NOTIF_ID, createNotification())
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            locationRepository.setServiceStatus(true)
-        }
-
-        // 3. Request location updates
+        // Request location updates
         try {
+            startForeground(NOTIF_ID, createNotification())
+
+            lifecycleScope.launch(Dispatchers.IO) {
+                locationRepository.setServiceStatus(true)
+            }
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
                 locationCallback,

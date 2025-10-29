@@ -1,13 +1,17 @@
 package me.nightfury.locationapp
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -31,31 +35,49 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     // Permission setup for both Foreground Location and Background Location (if required)
-    private val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        mutableSetOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        )
-    } else {
-        mutableSetOf(Manifest.permission.ACCESS_FINE_LOCATION)
-    }.apply {
-        add(Manifest.permission.POST_NOTIFICATIONS)
-    }
-
-    private val requestPermissionsLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val granted = permissions.entries.all { it.value }
-        if (granted) {
-            AppLogger.i(logSource, "Location permissions granted.")
-        } else {
-            Toast.makeText(
-                this,
-                "Location permission is required",
-                Toast.LENGTH_LONG
-            ).show()
+    private val requiredForegroundPermissions = mutableListOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    ).apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.POST_NOTIFICATIONS)
         }
-    }
+    }.toTypedArray()
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private val backgroundPermission =
+        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+
+    private val requestForegroundPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val granted = permissions.values.all { it }
+            if (granted) {
+                AppLogger.i(logSource, "Foreground location granted(location + notification).")
+                checkAndRequestBackgroundPermission()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Location & Notification permissions are required",
+                    Toast.LENGTH_LONG
+                ).show()
+                openApplicationSettings()
+            }
+        }
+
+    private val requestBackgroundPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                AppLogger.i(logSource, "Background location granted (Allow all the time).")
+            } else {
+                Toast.makeText(
+                    this,
+                    "Please enable 'Allow all the time' for background location.",
+                    Toast.LENGTH_LONG
+                ).show()
+                openApplicationSettings()
+            }
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,15 +114,65 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkAndRequestPermissions(): Boolean {
-        val allGranted = requiredPermissions.all {
-            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-        }
+    fun checkAndRequestPermissions(): Boolean {
+        val fineGranted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
 
-        if (!allGranted) {
-            requestPermissionsLauncher.launch(requiredPermissions.toTypedArray())
+        val coarseGranted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val backgroundGranted =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            else true
+
+        val notificationGranted =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            else true
+        val allForegroundGranted = fineGranted && coarseGranted && notificationGranted
+
+        return if (!allForegroundGranted) {
+            requestForegroundPermissionsLauncher.launch(requiredForegroundPermissions)
+            false
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !backgroundGranted) {
+            checkAndRequestBackgroundPermission()
+            false
+        } else {
+            true
         }
-        return allGranted
+    }
+
+    private fun checkAndRequestBackgroundPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val granted = ContextCompat.checkSelfPermission(
+                this,
+                backgroundPermission
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!granted) {
+                // For Android 11+ (API 30), background permission often requires going to Settings
+                requestBackgroundPermissionLauncher.launch(backgroundPermission)
+            }
+        }
+    }
+
+    private fun openApplicationSettings() {
+        val intent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.fromParts("package", packageName, null)
+        )
+        startActivity(intent)
     }
 
     private fun setupRecyclerView() {
