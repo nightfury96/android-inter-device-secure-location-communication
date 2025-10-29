@@ -1,18 +1,18 @@
 package me.nightfury.locationdata.repo
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import me.nightfury.locationdata.local.LocationDao
 import me.nightfury.locationdata.local.LocationEntity
 import me.nightfury.locationdomain.repo.LocationRepository
+import me.nightfury.locationdomain.repo.SecureStorage
 import me.nightfury.sharedlogger.AppLogger
 import me.nightfury.sharedmodels.LocationRecord
 
 class LocationRepositoryImpl(
     private val dao: LocationDao,
-    private val datastore: SharedPreferences
+    private val datastore: SecureStorage
 ) : LocationRepository {
 
     override fun getLocationsFlow(): Flow<List<LocationRecord>> {
@@ -35,18 +35,11 @@ class LocationRepositoryImpl(
         dao.clearAll()
     }
 
-
-    companion object {
-        const val SERVICE_STATUS = "is_service_running"
-    }
-
     override suspend fun setServiceStatus(isRunning: Boolean) {
-        datastore.edit {
-            putBoolean(SERVICE_STATUS, isRunning)
-        }
+        datastore.setServiceStatus(isRunning)
     }
 
     override suspend fun isServiceRunning(): Boolean {
-        return datastore.getBoolean(SERVICE_STATUS, false)
+        return datastore.isServiceRunning().first()
     }
 }

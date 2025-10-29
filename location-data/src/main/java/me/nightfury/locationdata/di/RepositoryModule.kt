@@ -1,6 +1,5 @@
 package me.nightfury.locationdata.di
 
-import android.content.SharedPreferences
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -8,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import me.nightfury.locationdata.local.LocationDao
 import me.nightfury.locationdata.repo.LocationRepositoryImpl
 import me.nightfury.locationdomain.repo.LocationRepository
+import me.nightfury.locationdomain.repo.SecureStorage
 import javax.inject.Singleton
 
 @Module
@@ -18,7 +18,7 @@ object RepositoryModule {
     @Singleton
     fun provideLocationRepository(
         dao: LocationDao,
-        sharePref: SharedPreferences
+        sharePref: SecureStorage
     ): LocationRepository {
         return LocationRepositoryImpl(dao, sharePref)
     }

@@ -9,5 +9,8 @@ class LocationApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AppLogger.i("LocationApp", "App started")
+
+        // Load the SQLCipher native libraries
+        System.loadLibrary("sqlcipher")
     }
 }
