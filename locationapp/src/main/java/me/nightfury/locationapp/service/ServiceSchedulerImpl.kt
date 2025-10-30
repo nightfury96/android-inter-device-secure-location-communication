@@ -57,7 +57,7 @@ class ServiceSchedulerImpl @Inject constructor(
     // Schedules a OneTimeWorkRequest
     private fun scheduleBootRecoveryWork() {
         val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+            .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
         val recoveryRequest = OneTimeWorkRequest.Builder(BootWorker::class.java)
