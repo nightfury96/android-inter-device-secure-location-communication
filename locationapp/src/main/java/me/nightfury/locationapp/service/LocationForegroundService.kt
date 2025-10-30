@@ -5,6 +5,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
@@ -59,6 +61,9 @@ class LocationForegroundService : LifecycleService() {
 
     @Inject
     lateinit var locationRepository: LocationRepository
+
+    @Inject
+    lateinit var connectivityManager: ConnectivityManager
     private val logSource = "LFGS_Lifecycle"
 
     private val fusedLocationClient by lazy {
@@ -117,11 +122,23 @@ class LocationForegroundService : LifecycleService() {
     private fun handleOsRestart() {
         lifecycleScope.launch {
             if (manageLocationWorkerUseCase.isServiceRunning()) {
-                AppLogger.i(
-                    logSource,
-                    "OS restart detected (action=null). User intent is ON. Resuming service and re-scheduling recovery worker."
-                )
-                manageLocationWorkerUseCase.startPeriodicWork()
+                // User intent was to run, now check network constraint
+                if (isNetworkAvailable()) {
+                    AppLogger.i(
+                        logSource,
+                        "OS Restart: Network is ON, User intent is ON. Restarting service and recovery worker."
+                    )
+                    // This re-starts the service AND re-schedules the BootWorker
+                    manageLocationWorkerUseCase.startPeriodicWork()
+                } else {
+                    // Network is OFF. Do not restart.
+                    // The BootWorker (which has a network constraint) will
+                    // handle the restart when the network comes back.
+                    AppLogger.w(
+                        logSource,
+                        "OS Restart: Network is OFF. Deferring restart to BootWorker."
+                    )
+                }
             } else {
                 AppLogger.i(
                     logSource,
@@ -130,6 +147,19 @@ class LocationForegroundService : LifecycleService() {
                 stopSelf()
             }
         }
+    }
+
+    /**
+     * Checks if the device has an active network connection.
+     */
+    private fun isNetworkAvailable(): Boolean {
+        val capabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        return capabilities?.run {
+            hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                    hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                    hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+        } ?: false
     }
 
     private fun startLocationUpdates() {
