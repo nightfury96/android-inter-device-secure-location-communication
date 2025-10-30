@@ -20,13 +20,18 @@ Both applications follow **Clean Architecture** principles with strict layer sep
 
 Implements multi-module Clean Architecture:
 location-app/
-│
-├── location-domain/ # Business rules, interfaces, use cases
-├── location-data/ # Repository implementations, encrypted Room DB, DataStore, Tink
-├── location-presentation/ # ViewModels and UI state management (MVVM)
-├── location-app/ # Application module (Activity, ForegroundService, Worker, DI setup)
-├── shared-logger/ # Shared module for structured logging
-└── shared-models/ # Shared module for data models (LocationRecord, Result, etc.)
+
+├ location-domain/ # Business rules, interfaces, use cases
+
+├ location-data/ # Repository implementations, encrypted Room DB, DataStore, Tink
+
+├ location-presentation/ # ViewModels and UI state management (MVVM)
+
+├ location-app/ # Application module (Activity, ForegroundService, Worker, DI setup)
+
+├ shared-logger/ # Shared module for structured logging
+
+└ shared-models/ # Shared module for data models (LocationRecord, Result, etc.)
 
 - **Domain layer** defines `LocationRepository`, `SecureStorage`, and use cases.
 - **Data layer** implements these interfaces using Room, SQLCipher, and Tink for encryption.
@@ -41,9 +46,12 @@ location-app/
 
 Implements **MVI** in a single module with clear separation of packages:
 internet-app/
-├── domain/ # Commands and repository interfaces
-├── data/ # Command repository implementation, ContentProvider access
-└── presentation/ # MVI ViewModel, State, and UI
+
+├ domain/ # Commands and repository interfaces
+
+├ data/ # Command repository implementation, ContentProvider access
+
+└ presentation/ # MVI ViewModel, State, and UI
 
 Uses **Koin** for dependency injection.
 
@@ -162,15 +170,57 @@ Each command returns structured results or acknowledgments serialized from share
 
 ## 🧪 Testing
 
-Location App
-• LocationViewModelTest (JUnit + Coroutines test)
+### **Location App**
+
+• LocationViewModelTest
 • ✅ Verifies Flow collection updates UI state
 • ✅ Verifies startLocationService() updates repository and state
 • ✅ Verifies stopLocationService() updates repository and state
 • ✅ Verifies error handling during start/stop operations
 
-Internet App
+Testing is focused on the **presentation layer (ViewModel)** and its interaction with domain use
+cases.  
+The `LocationViewModelTest` ensures correct state updates, service management, and error handling
+using coroutine and flow-based tests.
+
+#### **🧩 Testing Frameworks and Tools**
+
+| Tool / Library              | Purpose                                                  |
+|-----------------------------|----------------------------------------------------------|
+| **JUnit 4**                 | Core unit testing framework                              |
+| **MockK**                   | Mocking and stubbing of use cases                        |
+| **app.cash.turbine**        | Reactive testing of Kotlin Flows                         |
+| **kotlinx-coroutines-test** | Deterministic coroutine and dispatcher control           |
+| **NoOpLogger**              | Simplifies log verification without Android dependencies |
+
+---
+
+#### **🧠 Test Design Philosophy**
+
+The tests isolate the `LocationViewModel` from Android components and real repositories.  
+Mocked use cases (`LocationDataUseCase` and `ManageLocationWorkerUseCase`) simulate domain behavior,
+ensuring ViewModel logic is validated independently from frameworks.
+
+All tests use a `StandardTestDispatcher` to control coroutine scheduling and avoid race
+conditions.  
+Each test follows a **Given → When → Then** pattern.
+
+---
+
+### **✅ Test Cases Summary**
+
+| Test ID    | Scenario                                                        | Expected Behavior                                                                                         |
+|------------|-----------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| **TEST 1** | `uiState updates when new locations emitted`                    | Verifies that the ViewModel correctly collects and reflects `Flow` emissions from the repository.         |
+| **TEST 2** | `startLocationService starts service and updates state`         | Ensures that starting the location service invokes the correct use case and updates UI state accordingly. |
+| **TEST 3** | `stopLocationService stops service and updates state`           | Confirms service stop behavior and UI state updates.                                                      |
+| **TEST 4** | `startLocationService sets error message when exception thrown` | Validates robust error handling and fallback message updates when use cases throw exceptions.             |
+
+### **Internet App**
+
 • Tested manually for inter-app communication and state rendering (MVI reducer behavior).
+
+---
 
 ## 🧰 CI/CD (Planned Configuration)
 
