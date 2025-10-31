@@ -227,7 +227,7 @@ Each test follows a **Given → When → Then** pattern.
 A GitHub Actions workflow will:
 
 1. Checkout code
-2. Setup JDK 17 + Gradle
+2. Setup JDK 11 + Gradle
 3. Build both apps
 4. Run all tests (./gradlew test)
 5. Generate test reports (build/reports/tests/test/index.html)
@@ -238,7 +238,7 @@ A GitHub Actions workflow will:
 ### 1️⃣ Prerequisites
 
 	•	Android Studio Ladybug (or newer)
-	•	JDK 17
+	•	JDK 11
 	•	Gradle 8+
 	•	Min SDK 21
 	•	Target SDK 36
