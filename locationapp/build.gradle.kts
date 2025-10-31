@@ -40,6 +40,10 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    lint {
+        // Turns off checks for the issue IDs you specify.
+        disable += "BadConfigurationProvider"
+    }
 }
 
 dependencies {

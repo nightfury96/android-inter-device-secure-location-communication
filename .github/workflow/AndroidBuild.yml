@@ -1,0 +1,52 @@
+name: Android CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "develop" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # Step 2: Setup JDK 17
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 11
+
+      # Step 3: Build both apps
+      - name: Build all modules
+        run: ./gradlew clean build --stacktrace
+
+      # Step 4: Run tests
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest
+
+      # Step 5: Upload test reports as artifacts
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            **/build/reports/tests/testDebugUnitTest/
+            **/build/reports/tests/test/
+
+      # Step 6: Upload test reports as artifacts
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apks
+          path: '**/build/outputs/apk/**/*.apk'
