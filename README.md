@@ -7,8 +7,8 @@ This project simulates a **secure communication system between two Android appli
 - **Location App** — collects and stores user location securely in the background.
 - **Internet App** — sends commands to the Location App and displays received responses.
 
-The focus is on **Clean Architecture**, **security**, **reliability**, **testability**, and *
-*scalable modular design** — rather than complex UI.
+The focus is on **Clean Architecture**, **security**, **reliability**, **testability**, and
+**scalable modular design** — rather than complex UI.
 
 ---
 
