@@ -14,6 +14,15 @@ class WorkManagerInitializer : Initializer<WorkManager>, Configuration.Provider 
     lateinit var locationWorkerFactory: LocationWorkerFactory
 
     override fun create(context: Context): WorkManager {
+        if (isTestProcess()) {
+            android.util.Log.i(
+                "WorkManagerInitializer",
+                "Skipping WorkManager init in test process."
+            )
+            val testConfig = Configuration.Builder().build()
+            WorkManager.initialize(context, testConfig)
+            return WorkManager.getInstance(context)
+        }
         InitializerEntryPoint.Companion.resolve(context).inject(this)
         WorkManager.Companion.initialize(context, workManagerConfiguration)
         return WorkManager.Companion.getInstance(context)
@@ -31,4 +40,19 @@ class WorkManagerInitializer : Initializer<WorkManager>, Configuration.Provider 
                 .build()
         }
 
+    private fun isTestProcess(): Boolean {
+        // 1️⃣ Check for Android instrumented tests (has androidx.test runtime)
+        val isInstrumentedTest = try {
+            Class.forName("androidx.test.platform.app.InstrumentationRegistry")
+            true
+        } catch (_: ClassNotFoundException) {
+            false
+        }
+
+        // 2️⃣ Check for local (Robolectric / JVM) tests
+        val isUnitTest = "true" == System.getProperty("robolectric") ||
+                (System.getProperty("java.vendor")?.contains("JetBrains") == true)
+
+        return isInstrumentedTest || isUnitTest
+    }
 }
