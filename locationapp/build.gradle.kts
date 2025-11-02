@@ -18,7 +18,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "me.nightfury.locationapp.HiltTestRunner"
     }
 
     buildTypes {
@@ -44,6 +44,20 @@ android {
         // Turns off checks for the issue IDs you specify.
         disable += "BadConfigurationProvider"
     }
+    packaging {
+        resources {
+            excludes += listOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+                "META-INF/LICENSE",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/LICENSE.txt",
+                "META-INF/DEPENDENCIES"
+            )
+        }
+    }
+
 }
 
 dependencies {
@@ -66,15 +80,26 @@ dependencies {
 
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
+    implementation(libs.androidx.rules)
+    implementation(libs.androidx.work.testing)
     ksp(libs.androidx.hilt.work.compiler)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
     implementation(libs.androidx.sqlite)
     implementation(libs.sqlcipher.android)
 
     testImplementation(libs.junit)
+    testImplementation(libs.androidx.arch.core.testing)
+    kspAndroidTest(libs.hilt.compiler)
+    androidTestImplementation(libs.hilt.test)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.mockk.android)
 }

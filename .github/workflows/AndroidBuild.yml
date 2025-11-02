@@ -34,6 +34,12 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
 
+      - name: Start Android Emulator
+        uses: reactivecircus/android-emulator-runner@v2
+          with:
+            api-level: 33
+            script: ./gradlew connectedDebugAndroidTest
+
       # Step 5: Upload test reports as artifacts
       - name: Upload Test Reports
         if: always()
