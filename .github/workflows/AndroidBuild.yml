@@ -33,12 +33,12 @@ jobs:
       # Step 4: Run tests
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
-
-      - name: Install SDK components
-        run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-33" "emulator"
-          sdkmanager "system-images;android-33;google_apis;x86_64"
+      #
+      #      - name: Install SDK components
+      #        run: |
+      #          yes | sdkmanager --licenses
+      #          sdkmanager "platform-tools" "platforms;android-33" "emulator"
+      #          sdkmanager "system-images;android-33;google_apis;x86_64"
 
       - name: Run Instrumented Tests on Emulator
         uses: reactivecircus/android-emulator-runner@v2
