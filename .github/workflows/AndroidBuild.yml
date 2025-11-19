@@ -25,29 +25,26 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: 'gradle' # Enable caching to speed up builds
 
       # Step 3: Build both apps
       - name: Build all modules
-        run: ./gradlew clean build --stacktrace
+        run: ./gradlew clean assembleDebug assembleDebugAndroidTest --stacktrace
 
       # Step 4: Run tests
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
-      #
-      #      - name: Install SDK components
-      #        run: |
-      #          yes | sdkmanager --licenses
-      #          sdkmanager "platform-tools" "platforms;android-33" "emulator"
-      #          sdkmanager "system-images;android-33;google_apis;x86_64"
 
       - name: Run Instrumented Tests on Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 33
+          api-level: 30
           target: google_apis
           arch: x86_64
           profile: pixel_6
-          script: ./gradlew connectedDebugAndroidTest
+          disable-animations: true
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: ./gradlew connectedDebugAndroidTest --stacktrace
 
       #      # Step 5: Upload test reports as artifacts
       #      - name: Upload Test Reports
